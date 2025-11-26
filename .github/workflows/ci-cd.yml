@@ -20,9 +20,13 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         working-directory: news-navigator-main
         run: npm install
+
+      - name: Ensure Vite is installed
+        working-directory: news-navigator-main
+        run: npm install vite --save-dev
 
       - name: Build frontend
         working-directory: news-navigator-main
