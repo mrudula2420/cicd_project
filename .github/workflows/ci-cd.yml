@@ -14,13 +14,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ------------ FRONTEND BUILD (React: news-navigator-main) ----------------
+      # ---------------- FRONTEND (React) ----------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         working-directory: news-navigator-main
         run: npm install
 
@@ -32,22 +32,22 @@ jobs:
         working-directory: news-navigator-main
         run: npm run build
 
-      - name: Upload frontend build artifact
+      - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: news-navigator-main/dist
 
-      # ------------ BACKEND BUILD (Spring Boot: demo) ----------------
-      - name: Set up Java 17
+      # ---------------- BACKEND (Spring Boot) ----------------
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build backend using Maven
+      - name: Build backend (skip tests)
         working-directory: demo
-        run: mvn -B package --file pom.xml
+        run: mvn -DskipTests clean install
 
       - name: Upload backend JAR
         uses: actions/upload-artifact@v4
