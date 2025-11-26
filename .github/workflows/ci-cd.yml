@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI Build
 
 on:
   push:
@@ -11,36 +11,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and run Docker Compose
-        run: docker compose -f docker-compose.yml up -d --build
+      # ------------ FRONTEND BUILD (React: news-navigator-main) ----------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
       - name: Install frontend dependencies
-        working-directory: ./news-navigator-main
+        working-directory: news-navigator-main
         run: npm install
 
       - name: Build frontend
-        working-directory: ./news-navigator-main
+        working-directory: news-navigator-main
         run: npm run build
 
-      - name: Setup JDK
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: news-navigator-main/dist
+
+      # ------------ BACKEND BUILD (Spring Boot: demo) ----------------
+      - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
 
-      - name: Build Backend with Maven
-        working-directory: ./demo
-        run: mvn clean install -DskipTests
+      - name: Build backend using Maven
+        working-directory: demo
+        run: mvn -B package --file pom.xml
 
-      - name: Run backend tests
-        working-directory: ./demo
-        run: mvn test
-
-      - name: Stop and remove containers
-        run: docker compose -f docker-compose.yml down
+      - name: Upload backend JAR
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-jar
+          path: demo/target/*.jar
